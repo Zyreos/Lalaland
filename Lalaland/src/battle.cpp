@@ -3,8 +3,18 @@
 #include "./Headers/battle.h"
 
 Battle::Battle(Player& player, Enemy& enemy)
-	: player(player),  enemy(enemy), battleState(PLAYER_TURN)
+	: player(player), 
+	enemy(enemy),
+	battleState(PLAYER_TURN),
+	battleAction(WAIT),
+	option(0),
+	selectedRow(0)
 {}
+
+BattleState Battle::getBattleState()
+{
+	return battleState;
+}
 
 void Battle::Start()
 {
@@ -19,68 +29,90 @@ void Battle::Start()
 void Battle::Update()
 {
 
-	while (player.IsAlive() && enemy.IsAlive())
+	switch (battleState)
 	{
-
-		if (battleState == PLAYER_TURN)
+	case PLAYER_TURN:
+		if (IsKeyPressed(KEY_DOWN))
 		{
-			// TODO
-			// Get Player's imput
-
-			std::cout << "Select Battle Action: 1-Attack 2- Heal 3- Defend" << std::endl;
-						
-			BattleAction battleAction;
-			int action;
-			std::cin >> action;
-			battleAction = static_cast<BattleAction>(action);
-
-			switch (battleAction)
-			{
-			case ATTACK:
-				player.Attack(player, enemy);
-				std::cout << "Player Attack" << std::endl;
-				std::cout << player.getCurrentHp() << std::endl;
-				break;
-			case HEAL:
-				player.Heal();
-				std::cout << "Player Heal" << std::endl;
-				std::cout << player.getCurrentHp() << std::endl;
-				break;
-			case DEFEND:
-				player.setDefense();
-				std::cout << "Player Defend" << std::endl;
-				std::cout << player.getCurrentHp() << std::endl;
-				break;
-			case FLEE:
-				// TODO
-				// Reset Screen & Stats
-				break;
-			default:
-				break;
-			}
-
-			battleState = ENEMY_TURN;
+			option++;
+			if (option == 3)
+				option = 0;
 		}
-		else if (battleState == ENEMY_TURN)
+		else if (IsKeyPressed(KEY_UP))
 		{
-			enemy.Attack(enemy, player);
-			std::cout << "Enemy Attack" << std::endl;
-			std::cout << player.getCurrentHp() << std::endl;
+			option--;
+			if (option == 0)
+				option = 3;
+		}
+
+
+		if (IsKeyPressed(KEY_ENTER))
+		{
+			if (option == 0)
+				battleAction = ATTACK;
+			else if (option == 1)
+				battleAction = DEFEND;
+			else if (option == 2)
+				battleAction = HEAL;
+			else if (option == 3)
+				battleAction = RUN;
+		}
+
+		switch (battleAction)
+		{
+		case ATTACK:
+			player.Attack(player, enemy);
+			option = 0;
+			if (enemy.IsAlive())
+			{
+				battleState = ENEMY_TURN;
+			}
+			else
+			{
+				battleState = VICTORY;
+			}
+			battleAction = WAIT;
+			break;
+		case HEAL:
+			player.Heal();
+			option = 0;
+			battleState = ENEMY_TURN;
+			battleAction = WAIT;
+			break;
+		case DEFEND:
+			player.setDefense();
+			option = 0;
+			battleState = ENEMY_TURN;
+			battleAction = WAIT;
+			break;
+		case RUN:
+			// TODO
+			// Reset Screen & Stats
+			break;
+		default:
+			break;
+		}
+		break;
+	case ENEMY_TURN:
+		enemy.Attack(enemy, player);
+		if (player.IsAlive())
+		{
 			battleState = PLAYER_TURN;
 		}
-		
-	}
-	if (player.IsAlive() && !enemy.IsAlive())
-	{
-		battleState = VICTORY;
-		std::cout << "WIN" << std::endl;
-		Win();
-	}
-	else if (!player.IsAlive() && enemy.IsAlive())
-	{
-		battleState = DEFEAT;
-		std::cout << "DEFEAT" << std::endl;
-		Lose();
+		else
+		{
+			battleState = DEFEAT;
+		}
+		break;
+	case VICTORY:
+		player.GainXp(enemy.getXpAmount());
+		break;
+	case DEFEAT:
+		player.LoseXp(enemy.getXpAmount());
+
+		break;
+	default:
+		break;
 	}
 
 }
@@ -93,40 +125,25 @@ void Battle::Draw(Texture bgImg, Texture playerImg, Texture enemyImg)
 
 	enemy.BattleDraw(enemyImg, 450, 50, 256);
 
+
+	int x = 300;
+	int y = 400;
+	int spacing = 180;
+
+
+			DrawText("ATTACK", x, y, 30,
+				option == 0 ? YELLOW : WHITE);
+
+			DrawText("DEFEND", x, y + spacing, 30,
+				option == 1 ? YELLOW : WHITE);
+
+			DrawText("HEAL", x, y + spacing*2, 30,
+				option == 2 ? YELLOW : WHITE);
+
+			DrawText("RUN", x, y + spacing*3, 30,
+				option == 3 ? YELLOW : WHITE);
+
+			DrawText(TextFormat("Score: %d", player.getCurrentHp()), 200, 200, 40, MAROON);
+
 }
 
-void Battle::RunAway()
-{
-	// TODO
-	// Return to Previous Screen
-}
-
-void Battle::Win()
-{
-	player.GainXp(enemy.getXpAmount());
-	MoveNextArea();
-}
-
-void Battle::Lose()
-{
-	player.LoseXp(enemy.getXpAmount());
-	ResetArea();
-}
-
-void Battle::ReturnPreviousArea()
-{
-	std::cout << "Suposedly Return Previous Area" << std::endl;
-	// TODO
-}
-
-void Battle::MoveNextArea()
-{
-	std::cout << "Suposedly Move Next Area" << std::endl;
-	// TODO
-}
-
-void Battle::ResetArea()
-{
-	std::cout << "Suposedly Reset Area" << std::endl;
-	// TODO
-}

@@ -1,39 +1,36 @@
 #pragma once
 
 #include<string>
+#include "entity.h"
 
-enum ScreenState
+enum GameScreen
 {
-	GAME_START1,
-	FLOOR_11,
-	FLOOR_21,
-	FLOOR_31,
-	BATTLE1,
-	VICTORY1,
-	DEFEAT1
+	GAME_START = 0,
+	FLOOR_1 = 1,
+	FLOOR_2 = 2,
+	FLOOR_3 = 3,
+	COUNT = 4,
+	BATTLE = 5,
 };
 
 class Screen
 {
 protected:
-	int screenX;
-	int screenY;
-	int backgroundSizeX;
-	int backgroundSizeY;
-	std::string windowName;
-	ScreenState screenState;
+	Player& player;
+	Enemy& enemy;
+	GameScreen screen;
 
 public:
 
-	Screen();
-	Screen(std::string windowName, ScreenState screenState);
+	Screen(Player& player, Enemy& enemy, GameScreen screen);
 
-	int getScreenX();
-	int getScreenY();
-	int getBackgroundSizeX();
-	int getBackgroundSizeY();
-	std::string getWindowName();
-	int getScreenState();
+	Player& getPlayer();
+	Enemy& getEnemy();
+	GameScreen getGameScreen();
+
+	GameScreen moveToNext(GameScreen curScreen);
+	GameScreen goBack(GameScreen curScreen);
+
+	GameScreen screenLogic(GameScreen currentFloor, Enemy& enemy);
 
 };
-

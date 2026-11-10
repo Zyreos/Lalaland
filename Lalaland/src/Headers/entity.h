@@ -28,7 +28,7 @@ public:
 	Entity();
 
 	virtual void Update() = 0;
-	virtual void FloorDraw(Texture texture, int posX, int posY) = 0;
+	void FloorDraw(Texture texture, float posX, float posY, float size);
 	void BattleDraw(Texture texture, float posX, float posY, float size);
 
 	int getMaxHp();
@@ -37,9 +37,12 @@ public:
 	int getDefense();
 	int getPositionX();
 	int getPositionY();
+	Texture getTexture();
 	int getTextureWidth();
 	int getTextureHeight();
+
 		
+	void setPosition();
 	void setPositionX(int posX);
 	void setPositionY(int posY);
 	void setHealth();
@@ -67,8 +70,7 @@ public:
 	Player();
 
 	void Update() override;
-	void FloorDraw(Texture texture, int posX, int posY) override;
-	
+
 	void Move();
 
 	int getLevel();
@@ -84,16 +86,15 @@ class Enemy : public Entity
 {
 private:
 	int xpAmount;
+	bool hasBeenCleared;
 
 public:
 	Enemy();
 	Enemy(Texture loadTexture);
 
 	void Update() override;
-	void FloorDraw(Texture texture, int posX, int posY) override;
 
 	int getXpAmount();
-	Texture getTexture();
 
 	void setNextLevel(Texture texture);
 	void setPrevLevel(Texture texture);

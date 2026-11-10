@@ -3,15 +3,8 @@
 #include "resource_dir.h"
 
 #include "./Headers/battle.h"
+#include "./Headers/screen.h"
 
-enum GameState
-{
-	GAME_START,
-	FLOOR_1,
-	FLOOR_2,
-	FLOOR_3,
-	BATTLE,
-};
 
 int main ()
 {
@@ -33,10 +26,18 @@ int main ()
 
 
 	Player player;
-	Enemy enemy(enemyCatBox);
-	Battle battle(player, enemy);
+	Enemy enemy1(enemyCatBox);
+	Enemy enemy2(enemyCatWitch);
+	Enemy enemy3(enemyCatVampire);
+	Battle battle(player, enemy1);
 
-	GameState gameState = FLOOR_1;
+	Enemy* currentEnemy;
+	std::unique_ptr<Battle> currentBattle;
+
+	Screen screen(player, enemy1, GAME_START);
+
+	GameScreen gameState = screen.getGameScreen();
+	GameScreen currentFloor = screen.getGameScreen();
 
 	while (!WindowShouldClose())	
 	{
@@ -44,23 +45,56 @@ int main ()
 		switch (gameState)
 		{
 		case GAME_START:
+			gameState = FLOOR_1;
 			break;
 		case FLOOR_1:
-			player.Move();
-			if (player.getPositionX() == enemy.getPositionX() &&
-				player.getPositionY() == enemy.getPositionY())
+			currentFloor = gameState;
+			gameState = screen.screenLogic(currentFloor, enemy1);
+			if (gameState == BATTLE)
 			{
-				gameState = BATTLE;
+				currentEnemy = &enemy1;
 			}
 			break;
 		case FLOOR_2:
-			player.Move();
+			currentFloor = gameState;
+			gameState = screen.screenLogic(currentFloor, enemy2);
+			if (gameState == BATTLE)
+			{
+				currentEnemy = &enemy2;
+			}
 			break;
 		case FLOOR_3:
-			player.Move();
+			currentFloor = gameState;
+			gameState = screen.screenLogic(currentFloor, enemy3);
+			if (gameState == BATTLE)
+			{
+				currentEnemy = &enemy3;
+			}
 			break;
 		case BATTLE:
-			battle.Update();
+
+			if(!currentBattle)
+			{
+				currentBattle = std::make_unique<Battle>(player, *currentEnemy);
+				currentBattle->Start();
+			}
+			else
+			{
+				currentBattle->Update();
+			}
+
+			if (currentBattle->getBattleState() == VICTORY)
+			{
+				gameState = screen.moveToNext(currentFloor);
+				currentBattle.reset();
+				currentEnemy = nullptr;
+			}
+			else if (currentBattle->getBattleState() == DEFEAT)
+			{
+				gameState = currentFloor;
+				currentBattle.reset();
+				currentEnemy = nullptr;
+			}
 			break;
 		default:
 			break;
@@ -83,20 +117,45 @@ int main ()
 				}
 			}
 
-			player.FloorDraw(niceCat, player.getPositionX(), player.getPositionY());
-			enemy.FloorDraw(enemyCatBox, enemy.getPositionX(), enemy.getPositionY());
+			player.FloorDraw(player.getTexture(), player.getPositionX(), player.getPositionY(), 64);
+			enemy1.FloorDraw(enemy1.getTexture(), enemy1.getPositionX(), enemy1.getPositionY(), 64);
+
 			break;
 		case FLOOR_2:
+			for (int y = 0; y < screenY; y += bgSize)
+			{
+				for (int x = 0; x < screenX; x += bgSize)
+				{
+					DrawTexture(floorBg, x, y, WHITE);
+				}
+			}
+
+			player.FloorDraw(player.getTexture(), player.getPositionX(), player.getPositionY(), 64);
+			enemy2.FloorDraw(enemy2.getTexture(), enemy2.getPositionX(), enemy2.getPositionY(), 64);
 			break;
 		case FLOOR_3:
+			for (int y = 0; y < screenY; y += bgSize)
+			{
+				for (int x = 0; x < screenX; x += bgSize)
+				{
+					DrawTexture(floorBg, x, y, WHITE);
+				}
+			}
+
+			player.FloorDraw(player.getTexture(), player.getPositionX(), player.getPositionY(), 64);
+			enemy3.FloorDraw(enemy3.getTexture(), enemy3.getPositionX(), enemy3.getPositionY(), 64);
 			break;
 		case BATTLE:
-			battle.Draw(battleBg, niceCat, enemyCatBox);
+
+			if (currentBattle)
+			{
+				currentBattle->Draw(battleBg, niceCat, currentEnemy->getTexture());
+			}
+									
 			break;
 		default:
 			break;
 		}
-
 
 		ClearBackground(RAYWHITE);
 		EndDrawing();
@@ -104,16 +163,5 @@ int main ()
 
 	CloseWindow();
 	return 0;
-
-
-	//Player player;
-	//Enemy enemy;
-
-	//Battle battle(player, enemy);
-
-	//battle.Start();
-	//battle.Update();
-
-	//std::cin.get();
 
 }

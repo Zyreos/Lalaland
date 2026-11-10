@@ -19,6 +19,16 @@ Entity::Entity()
 { }
 
 
+
+void Entity::FloorDraw(Texture texture, float posX, float posY, float size)
+{
+	DrawTexturePro(texture,
+		{ 0,0,(float)texture.width, (float)texture.height },
+		{ posX,posY,size,size },
+		{ 0,0 },
+		0.0f, WHITE);
+}
+
 void Entity::BattleDraw(Texture texture, float posX, float posY, float size)
 {
 	DrawTexturePro(texture,
@@ -59,6 +69,11 @@ int Entity::getPositionY()
 	return position.y;
 }
 
+Texture Entity::getTexture()
+{
+	return texture;
+}
+
 int Entity::getTextureWidth()
 {
 	return texture.width;
@@ -67,6 +82,12 @@ int Entity::getTextureWidth()
 int Entity::getTextureHeight()
 {
 	return texture.height;
+}
+
+void Entity::setPosition()
+{
+	position.x = 400;
+	position.y = 300;
 }
 
 void Entity::setPositionX(int posX)
@@ -145,11 +166,6 @@ void Player::Update()
 	// TODO
 }
 
-void Player::FloorDraw(Texture texture, int posX, int posY)
-{
-	DrawTexture(texture, posX, posY, WHITE);
-}
-
 void Player::Move()
 {
 	if (IsKeyDown(KEY_RIGHT)) position.x += 2.0f;
@@ -204,7 +220,7 @@ void Player::LoseXp(int xp)
 }
 
 Enemy::Enemy()
-	: xpAmount(30)
+	: xpAmount(30), hasBeenCleared(false)
 {
 	name		= "Enemy";
 	position.x	= 400;
@@ -212,7 +228,7 @@ Enemy::Enemy()
 }
 
 Enemy::Enemy(Texture loadTexture)
-	: xpAmount(30)
+	: xpAmount(30), hasBeenCleared(false)
 {
 	name		= "Enemy";
 	texture		= loadTexture;
@@ -225,19 +241,11 @@ void Enemy::Update()
 	//TODO
 }
 
-void Enemy::FloorDraw(Texture texture, int posX, int posY)
-{
-	DrawTexture(texture, posX, posY, WHITE);
-}
-
 int Enemy::getXpAmount()
 {
 	return xpAmount;
 }
-Texture Enemy::getTexture()
-{
-	return texture;
-}
+
 
 void Enemy::setNextLevel(Texture texture)
 {

@@ -2,6 +2,7 @@
 #include <string>
 
 #include "entity.h"
+#include "screen.h"
 
 enum BattleState
 {
@@ -16,7 +17,8 @@ enum BattleAction
     ATTACK = 1,
     HEAL,
     DEFEND,
-    FLEE
+    RUN,
+    WAIT
 };
 
 class Battle
@@ -26,20 +28,17 @@ private:
     Enemy& enemy;
 
     BattleState battleState;
+    BattleAction battleAction;
+    int option;
+    int selectedRow;
 
 public:
     Battle(Player& player, Enemy& enemy);
 
+    BattleState getBattleState();
+
     void Start();
     void Update();
     void Draw(Texture bgImg, Texture playerImg, Texture enemyImg);
-
-    void RunAway();
-
-    void Win();
-    void Lose();
-    void ReturnPreviousArea();
-    void MoveNextArea();
-    void ResetArea();
 
 };

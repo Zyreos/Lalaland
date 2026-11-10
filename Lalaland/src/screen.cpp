@@ -1,28 +1,71 @@
+#include <iostream>
+
 #include "./Headers/screen.h"
 
-Screen::Screen()
-	:screenX(800),
-	screenY(600),
-	backgroundSizeX(64),
-	backgroundSizeY(64),
-	windowName("GAME_START"),
-	screenState(GAME_START1)
+
+Screen::Screen(Player& player, Enemy& enemy, GameScreen screen)
+	: player(player), enemy(enemy), screen(screen)
 { }
 
-Screen::Screen(std::string windowName, ScreenState screenState)
-	:screenX(800),
-	screenY(600),
-	backgroundSizeX(64),
-	backgroundSizeY(64),
-	windowName(windowName),
-	screenState(screenState)
-{ }
+Player& Screen::getPlayer()
+{
+	return player;
+}
 
-int Screen::getScreenX()
+Enemy& Screen::getEnemy()
 {
-	return screenX;
+	return enemy;
 }
-int Screen::getScreenY()
+
+GameScreen Screen::getGameScreen()
 {
-	return screenY;
+	return screen;
 }
+
+GameScreen Screen::moveToNext(GameScreen curScreen)
+{
+	return static_cast<GameScreen>((curScreen + 1) % COUNT);
+}
+
+GameScreen Screen::goBack(GameScreen curScreen)
+{
+	return static_cast<GameScreen>((curScreen - 1) % COUNT);
+}
+
+GameScreen Screen::screenLogic(GameScreen currentFloor, Enemy& enemyF)
+{
+	GameScreen prevFloor = goBack(currentFloor);
+	GameScreen nextFloor = moveToNext(currentFloor);
+	GameScreen targetState;
+
+	player.Move();
+	if (player.getPositionX() == enemyF.getPositionX() &&
+		player.getPositionY() == enemyF.getPositionY())
+	{
+		player.setPosition();
+		return targetState = BATTLE;
+
+	}
+	else if (player.getPositionX() == 0 &&
+			 player.getPositionY() == 0 &&
+			 currentFloor != FLOOR_3)
+	{
+		player.setPosition();
+		return targetState = nextFloor;
+	}
+	else if (player.getPositionX() == 800 &&
+			 player.getPositionY() == 800 &&
+			 currentFloor != FLOOR_1)
+	{
+		player.setPosition();
+		return targetState = prevFloor;
+	}
+	else
+	{
+		return currentFloor;
+	}
+}
+
+
+
+
