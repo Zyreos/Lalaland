@@ -147,3 +147,8 @@ void Battle::Draw(Texture bgImg, Texture playerImg, Texture enemyImg)
 
 }
 
+void Battle::DrawMenu()
+{
+
+}
+

@@ -41,4 +41,5 @@ public:
     void Update();
     void Draw(Texture bgImg, Texture playerImg, Texture enemyImg);
 
+    void DrawMenu();
 };

@@ -22,8 +22,7 @@ int main ()
 	Texture2D niceCat			= LoadTexture("cat_nice.png");
 	Texture2D enemyCatBox		= LoadTexture("EvilBox1.png");
 	Texture2D enemyCatWitch		= LoadTexture("WitchFlying.png");
-	Texture2D enemyCatVampire	= LoadTexture("VampireAmgry.png");
-
+	Texture2D enemyCatVampire	= LoadTexture("VampireAngry.png");
 
 	Player player;
 	Enemy enemy1(enemyCatBox);
@@ -93,7 +92,6 @@ int main ()
 			{
 				gameState = currentFloor;
 				currentBattle.reset();
-				currentEnemy = nullptr;
 			}
 			break;
 		default:
